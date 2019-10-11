@@ -4,10 +4,21 @@ class FSM {
      * @param config
      */
     constructor(config) {
+      this.history = [];
+      this.point = null;
+
       if (config) {
         this.states = config.states;
         this.now = config.initial;
+        this.history.push(this.now);
+        this.point = 0;
       } else throw new SyntaxError('Error');
+
+    }
+
+    addHistory(story = this.now) {
+      this.point++;
+      this.history[this.point] = story;
     }
 
     /**
@@ -27,6 +38,8 @@ class FSM {
       if (this.states[state])
         this.now = state;
         else throw new SyntaxError('Error');
+
+      this.addHistory();
     }
 
     /**
@@ -38,6 +51,8 @@ class FSM {
       if (state)
         this.now = state;
         else throw new SyntaxError('Error');
+
+      this.addHistory();
     }
 
     /**
@@ -45,6 +60,8 @@ class FSM {
      */
     reset() {
       this.now = 'normal';
+
+      this.addHistory();
     }
 
     findState(transitions, event) {
@@ -82,19 +99,34 @@ class FSM {
      * Returns false if undo is not available.
      * @returns {Boolean}
      */
-    undo() {}
+    undo() {
+      if (this.point>0) {
+        this.now = this.history[this.point-1];
+        this.point--;
+        return true;
+      } else return false;
+    }
 
     /**
      * Goes redo to state.
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-    redo() {}
+    redo() {
+      if (this.history[this.point+1]) {
+        this.now = this.history[this.point+1];
+        this.point++;
+        return true;
+      } else return false;
+    }
 
     /**
      * Clears transition history
      */
-    clearHistory() {}
+    clearHistory() {
+      this.history = [];
+      this.point = null;
+    }
 }
 
 module.exports = FSM;
